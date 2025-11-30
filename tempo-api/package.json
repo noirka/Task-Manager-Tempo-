@@ -3,13 +3,13 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {
-    "start": "node src/index.js",
-    "lint": "eslint src/**/*.js",
-    "lint:fix": "eslint src/**/*.js --fix",
-    "format": "prettier --write src/**/*.js",
-    "prepare": "husky"
-  },
+"scripts": {
+  "start": "node index.js",
+  "lint": "eslint index.js src/**/*.js",
+  "lint:fix": "eslint index.js src/**/*.js --fix",
+  "format": "prettier --write index.js src/**/*.js",
+  "prepare": "husky"
+},
   "keywords": [],
   "author": "",
   "license": "ISC",
