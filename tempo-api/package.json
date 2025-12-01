@@ -3,18 +3,19 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-"scripts": {
-  "start": "node index.js",
-  "lint": "eslint index.js src/**/*.js",
-  "lint:fix": "eslint index.js src/**/*.js --fix",
-  "format": "prettier --write index.js src/**/*.js",
-  "prepare": "husky"
-},
+  "scripts": {
+    "start": "node index.js",
+    "lint": "eslint index.js src/**/*.js",
+    "lint:fix": "eslint index.js src/**/*.js --fix",
+    "format": "prettier --write index.js src/**/*.js",
+    "prepare": "husky"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "mongodb": "^7.0.0"
   },
   "devDependencies": {
     "eslint": "^8.57.1",
@@ -27,10 +28,10 @@
     "prettier": "^3.6.2"
   },
   "lint-staged": {
-  "*.js": [
-    "eslint --fix",
-    "prettier --write",
-    "git add"
-  ]
+    "*.js": [
+      "eslint --fix",
+      "prettier --write",
+      "git add"
+    ]
   }
 }
