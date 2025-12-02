@@ -9,8 +9,7 @@ async function connectDB() {
   try {
     await client.connect();
     db = client.db('tempoDB');
-    console.log('🔗 Successfully connected to MongoDB.');
-    return db;
+    console.log('Successfully connected to MongoDB.');
   } catch (error) {
     console.error('Failed to connect to MongoDB:', error);
     process.exit(1);

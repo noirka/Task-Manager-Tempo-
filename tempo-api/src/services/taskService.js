@@ -1,5 +1,4 @@
 const TaskRepository = require('../repositories/taskRepository');
-// const CategoryRepository = require('../repositories/categoryRepository');
 
 const TaskService = {
   getAllTasks: async (filter) => TaskRepository.findAll(filter),
@@ -16,7 +15,6 @@ const TaskService = {
     if (!data.title) {
       throw new Error('Task title is required');
     }
-
     return TaskRepository.create(data);
   },
 
