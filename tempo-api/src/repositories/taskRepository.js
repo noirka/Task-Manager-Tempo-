@@ -1,26 +1,35 @@
-const {
-  tasks,
-  taskCategories,
-  getNextTaskId,
-  deleteTaskCategories,
-} = require('../models/data');
+const { ObjectId } = require('mongodb');
+const { getDB } = require('../config/db');
 
 const TaskRepository = {
-  findAll: (filter = {}) => {
-    let filteredTasks = tasks;
+  findAll: async (filter = {}) => {
+    const db = getDB();
+    const collection = db.collection('tasks');
+
+    const query = {};
     if (filter.isCompleted !== undefined) {
-      filteredTasks = filteredTasks.filter(
-        (t) => t.isCompleted === filter.isCompleted,
-      );
+      query.isCompleted = filter.isCompleted;
     }
-    return filteredTasks;
+
+    return collection.find(query).toArray();
   },
 
-  findById: (id) => tasks.find((t) => t.id === Number(id)),
+  findById: async (id) => {
+    const db = getDB();
+    const collection = db.collection('tasks');
 
-  create: (taskData, categoryIds = []) => {
+    try {
+      return collection.findOne({ _id: new ObjectId(id) });
+    } catch (e) {
+      return null;
+    }
+  },
+
+  create: async (taskData) => {
+    const db = getDB();
+    const collection = db.collection('tasks');
+
     const newTask = {
-      id: getNextTaskId(),
       title: taskData.title,
       description: taskData.description || null,
       isCompleted: false,
@@ -28,33 +37,36 @@ const TaskRepository = {
       createdAt: new Date(),
       updatedAt: new Date(),
     };
-    tasks.push(newTask);
 
-    categoryIds.forEach((catId) => {
-      taskCategories.push({ taskId: newTask.id, categoryId: Number(catId) });
-    });
+    const result = await collection.insertOne(newTask);
 
-    return newTask;
+    return { ...newTask, _id: result.insertedId };
   },
 
-  update: (id, updateData) => {
-    const task = tasks.find((t) => t.id === Number(id));
-    if (!task) return null;
+  update: async (id, updateData) => {
+    const db = getDB();
+    const collection = db.collection('tasks');
 
-    Object.assign(task, updateData, { updatedAt: new Date() });
+    const updatedFields = { ...updateData, updatedAt: new Date() };
 
-    return task;
+    delete updatedFields._id;
+
+    const result = await collection.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: updatedFields },
+    );
+
+    if (result.matchedCount === 0) return null;
+
+    return TaskRepository.findById(id);
   },
 
-  delete: (id) => {
-    const index = tasks.findIndex((t) => t.id === Number(id));
-    if (index === -1) return false;
+  delete: async (id) => {
+    const db = getDB();
+    const collection = db.collection('tasks');
+    const result = await collection.deleteOne({ _id: new ObjectId(id) });
 
-    tasks.splice(index, 1);
-
-    deleteTaskCategories(id);
-
-    return true;
+    return result.deletedCount > 0;
   },
 };
 

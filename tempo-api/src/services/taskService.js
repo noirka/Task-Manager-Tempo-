@@ -1,36 +1,27 @@
 const TaskRepository = require('../repositories/taskRepository');
-const CategoryRepository = require('../repositories/categoryRepository');
+// const CategoryRepository = require('../repositories/categoryRepository');
 
 const TaskService = {
-  getAllTasks: (filter) => TaskRepository.findAll(filter),
+  getAllTasks: async (filter) => TaskRepository.findAll(filter),
 
-  getTaskById: (id) => {
-    const task = TaskRepository.findById(id);
+  getTaskById: async (id) => {
+    const task = await TaskRepository.findById(id);
     if (!task) {
       throw new Error('Task not found');
     }
     return task;
   },
 
-  createTask: (data) => {
+  createTask: async (data) => {
     if (!data.title) {
       throw new Error('Task title is required');
     }
 
-    const categoryIds = [];
-    if (data.categoryName) {
-      let category = CategoryRepository.findByName(data.categoryName);
-      if (!category) {
-        category = CategoryRepository.create(data.categoryName);
-      }
-      categoryIds.push(category.id);
-    }
-
-    return TaskRepository.create(data, categoryIds);
+    return TaskRepository.create(data);
   },
 
-  updateTask: (id, data) => {
-    const task = TaskRepository.findById(id);
+  updateTask: async (id, data) => {
+    const task = await TaskRepository.findById(id);
     if (!task) {
       throw new Error('Task not found');
     }
@@ -41,8 +32,8 @@ const TaskService = {
     return TaskRepository.update(id, updatedData);
   },
 
-  markTaskComplete: (id) => {
-    const task = TaskRepository.findById(id);
+  markTaskComplete: async (id) => {
+    const task = await TaskRepository.findById(id);
     if (!task) {
       throw new Error('Task not found');
     }
