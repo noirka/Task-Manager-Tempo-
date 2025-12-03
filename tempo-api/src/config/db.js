@@ -9,9 +9,13 @@ async function connectDB() {
   try {
     await client.connect();
     db = client.db('tempoDB');
+    // eslint-disable-next-line no-console
     console.log('Successfully connected to MongoDB.');
+    return db;
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.error('Failed to connect to MongoDB:', error);
+    // eslint-disable-next-line consistent-return
     process.exit(1);
   }
 }

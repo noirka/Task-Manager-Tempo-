@@ -9,7 +9,8 @@
     "lint": "eslint index.js src/**/*.js",
     "lint:fix": "eslint index.js src/**/*.js --fix",
     "format": "prettier --write index.js src/**/*.js",
-    "prepare": "husky"
+    "prepare": "husky",
+    "fix": "npm run format && npm run lint:fix"
   },
   "keywords": [],
   "author": "",
@@ -27,7 +28,8 @@
     "husky": "^9.1.7",
     "jest": "^30.2.0",
     "lint-staged": "^16.2.7",
-    "prettier": "^3.6.2"
+    "prettier": "^3.6.2",
+    "supertest": "^7.1.4"
   },
   "lint-staged": {
     "*.js": [
