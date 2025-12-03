@@ -1,8 +1,8 @@
+/* eslint-disable consistent-return */
 const { MongoClient } = require('mongodb');
 
 const uri = process.env.MONGO_URI || 'mongodb://localhost:27017';
 const client = new MongoClient(uri);
-
 let db;
 
 async function connectDB() {
@@ -15,7 +15,6 @@ async function connectDB() {
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error('Failed to connect to MongoDB:', error);
-    // eslint-disable-next-line consistent-return
     process.exit(1);
   }
 }

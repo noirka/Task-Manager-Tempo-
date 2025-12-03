@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 const { ObjectId } = require('mongodb');
 const { getDB } = require('../config/db');
 
