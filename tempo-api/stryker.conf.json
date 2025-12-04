@@ -1,0 +1,24 @@
+{
+  "testRunner": "jest",
+  "mutator": {
+    "plugins": ["@stryker-mutator/javascript-plugins"]
+  },
+  "reporters": [
+    "html", 
+    "progress",
+    "clear-text"
+  ],
+  "coverageAnalysis": "perTest",
+  "files": [
+    "src/**/*.js",      
+    "src/__tests__/**/*.js" 
+  ],
+  "jest": {
+    "projectType": "custom",
+    "config": {
+      "testEnvironment": "node",
+      "testRegex": ["__tests__"],
+      "testTimeout": 60000
+    }
+  }
+}

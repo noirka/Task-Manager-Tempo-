@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node index.js",
     "test": "jest",
+    "mutate": "stryker run",
     "lint": "eslint index.js src/**/*.js",
     "lint:fix": "eslint index.js src/**/*.js --fix",
     "format": "prettier --write index.js src/**/*.js",
@@ -20,6 +21,8 @@
     "mongodb": "^7.0.0"
   },
   "devDependencies": {
+    "@stryker-mutator/core": "^9.4.0",
+    "@stryker-mutator/jest-runner": "^9.4.0",
     "eslint": "^8.57.1",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-prettier": "^10.1.8",
