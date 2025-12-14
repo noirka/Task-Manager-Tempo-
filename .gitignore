@@ -1,0 +1,6 @@
+.vscode/
+.idea/
+
+tempo-api/node_modules/
+
+.env
