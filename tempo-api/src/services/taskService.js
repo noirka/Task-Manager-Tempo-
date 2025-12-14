@@ -1,3 +1,4 @@
+const { ObjectId } = require('mongodb');
 const TaskRepository = require('../repositories/taskRepository');
 
 const TaskService = {
@@ -31,6 +32,10 @@ const TaskService = {
   },
 
   markTaskComplete: async (id) => {
+    if (!ObjectId.isValid(id)) {
+      throw new Error('Invalid ID format. Must be a 24-character hex string.');
+    }
+
     const task = await TaskRepository.findById(id);
     if (!task) {
       throw new Error('Task not found');
