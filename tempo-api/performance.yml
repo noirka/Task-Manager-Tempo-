@@ -1,0 +1,30 @@
+config:
+  target: 'https://task-manager-tempo.onrender.com'
+  phases:
+    - duration: 60
+      arrivalRate: 5
+      name: 'Warm-up phase'
+    - duration: 120
+      arrivalRate: 20
+      rampTo: 50
+      name: 'Main load test'
+  defaults:
+    headers:
+      Content-Type: 'application/json'
+
+scenarios:
+  - name: 'Task CRUD Operations (Create, List, Complete)'
+    flow:
+      - post:
+          url: '/api/v1/tasks'
+          json:
+            title: 'Performance Test Task {{ $randomNumber(1, 1000) }}'
+          capture:
+            json: '$._id'
+            as: 'newTaskId'
+
+      - get:
+          url: '/api/v1/tasks'
+
+      - put:
+          url: '/api/v1/tasks/{{ newTaskId }}/complete'
