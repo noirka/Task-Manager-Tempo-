@@ -1,13 +1,13 @@
 config:
-  target: 'https://task-manager-tempo.onrender.com'
+  target: 'http://localhost:3000'
   phases:
     - duration: 60
-      arrivalRate: 5
+      arrivalRate: 2
       name: 'Warm-up phase'
     - duration: 120
       arrivalRate: 20
       rampTo: 50
-      name: 'Main load test'
+      name: 'Short Local Profile Test'
   defaults:
     headers:
       Content-Type: 'application/json'
