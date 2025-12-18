@@ -11,6 +11,18 @@ async function connectDB() {
     db = client.db('tempoDB');
     // eslint-disable-next-line no-console
     console.log('Successfully connected to MongoDB.');
+
+    const tasksCollection = db.collection('tasks');
+
+    await tasksCollection.createIndex({ _id: 1 });
+
+    await tasksCollection.createIndex({ isCompleted: 1 });
+
+    await tasksCollection.createIndex({ createdAt: -1 });
+
+    // eslint-disable-next-line no-console
+    console.log('MongoDB indexes initialized successfully for performance.');
+
     return db;
   } catch (error) {
     // eslint-disable-next-line no-console
