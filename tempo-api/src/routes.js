@@ -1,10 +1,17 @@
 const express = require('express');
-const taskController = require('./controllers/taskController');
+const taskControllerFactory = require('./controllers/taskController');
 
-const router = express.Router();
+module.exports = function initializeApiRoutes({ taskService }) {
+  const router = express.Router();
 
-router.get('/tasks', taskController.getTasks);
-router.post('/tasks', taskController.createTask);
-router.put('/tasks/:id/complete', taskController.completeTask);
+  const taskController = taskControllerFactory(taskService);
 
-module.exports = router;
+  router.get('/tasks', taskController.getTasks);
+  router.post('/tasks', taskController.createTask);
+  router.put('/tasks/:id/complete', taskController.completeTask);
+
+  router.put('/tasks/:id', taskController.updateTask);
+  router.delete('/tasks/:id', taskController.deleteTask);
+
+  return router;
+};

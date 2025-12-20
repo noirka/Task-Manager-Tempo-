@@ -18,7 +18,8 @@
   "license": "ISC",
   "dependencies": {
     "express": "^5.1.0",
-    "mongodb": "^7.0.0"
+    "mongodb": "^7.0.0",
+    "@tempo-api/task-service": "file:packages/task-service"
   },
   "devDependencies": {
     "@stryker-mutator/core": "^9.4.0",

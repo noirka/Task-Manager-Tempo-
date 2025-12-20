@@ -1,0 +1,20 @@
+{
+  "name": "@tempo-api/task-service",
+  "version": "1.0.0",
+  "description": "Core business logic for managing tasks, extracted as a standalone service.",
+  
+  "main": "dist/index.js", 
+  
+  "types": "dist/index.d.ts",
+  
+  "scripts": {
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.6",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "mongodb": "^7.0.0"
+  }
+}
