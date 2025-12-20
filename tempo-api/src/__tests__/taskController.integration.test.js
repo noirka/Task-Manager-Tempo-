@@ -18,6 +18,8 @@ let taskRepository;
 let taskService;
 let services;
 
+const TEST_USER_ID = '654321098765432109876543';
+
 describe('TaskController Integration Tests', () => {
   beforeAll(async () => {
     await connectDB();
@@ -37,7 +39,7 @@ describe('TaskController Integration Tests', () => {
   });
 
   beforeEach(async () => {
-    await db.collection('tasks').deleteMany({});
+    await db.collection('tasks_new_schema').deleteMany({});
   });
 
   afterAll(async () => {
@@ -50,6 +52,7 @@ describe('TaskController Integration Tests', () => {
     const taskData = {
       title: 'Buy groceries for the week',
       description: 'Milk, bread, eggs',
+      userId: TEST_USER_ID,
     };
 
     const postResponse = await request(configuredApp)
@@ -75,7 +78,9 @@ describe('TaskController Integration Tests', () => {
       isCompleted: false,
       createdAt: new Date(),
       updatedAt: new Date(),
+      userId: TEST_USER_ID,
     };
+
     const createResult = await db
       .collection('tasks_new_schema')
       .insertOne(initialTask);

@@ -4,7 +4,13 @@ const TaskRepository = require('../repositories/taskRepository');
 
 jest.mock('../repositories/taskRepository');
 
+let taskServiceInstance;
+
 describe('TaskService Unit Tests', () => {
+  beforeAll(() => {
+    taskServiceInstance = new TaskService(TaskRepository);
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -22,17 +28,16 @@ describe('TaskService Unit Tests', () => {
       description: 'Test description',
     };
 
-    const result = await TaskService.createTask(taskData);
+    const result = await taskServiceInstance.createTask(taskData);
 
     expect(TaskRepository.create).toHaveBeenCalledTimes(1);
-
     expect(result).toEqual(mockTask);
   });
 
   it('should throw an error if task title is missing', async () => {
     const taskData = {};
 
-    await expect(TaskService.createTask(taskData)).rejects.toThrow(
+    await expect(taskServiceInstance.createTask(taskData)).rejects.toThrow(
       'Task title is required',
     );
 
@@ -43,7 +48,7 @@ describe('TaskService Unit Tests', () => {
     const mockTask = { _id: '123', title: 'Test Task' };
     TaskRepository.findById.mockResolvedValue(mockTask);
 
-    const result = await TaskService.getTaskById('123');
+    const result = await taskServiceInstance.getTaskById('123');
 
     expect(TaskRepository.findById).toHaveBeenCalledWith('123');
     expect(result).toEqual(mockTask);
@@ -52,7 +57,7 @@ describe('TaskService Unit Tests', () => {
   it('should throw an error if task not found by id', async () => {
     TaskRepository.findById.mockResolvedValue(null);
 
-    await expect(TaskService.getTaskById('999')).rejects.toThrow(
+    await expect(taskServiceInstance.getTaskById('999')).rejects.toThrow(
       'Task not found',
     );
   });
