@@ -17,6 +17,7 @@ module.exports = function taskControllerFactory(taskService) {
         const tasks = await taskService.getAllTasksByUserId(userId);
         return res.status(200).json(tasks);
       } catch (error) {
+        console.error('GetTasks Error:', error);
         const status = error.message.includes('Invalid ID format') ? 400 : 500;
         return res
           .status(status)
@@ -29,6 +30,7 @@ module.exports = function taskControllerFactory(taskService) {
         const newTask = await taskService.createTask(req.body);
         return res.status(201).json(newTask);
       } catch (error) {
+        console.error('CreateTask Error:', error);
         return res.status(400).json({ message: error.message });
       }
     },
@@ -42,6 +44,7 @@ module.exports = function taskControllerFactory(taskService) {
 
         return res.status(200).json(updatedTask);
       } catch (error) {
+        console.error('UpdateTask Error:', error);
         const status = error.message.includes('not found') ? 404 : 400;
         return res.status(status).json({ message: error.message });
       }
@@ -55,6 +58,7 @@ module.exports = function taskControllerFactory(taskService) {
 
         return res.status(204).send();
       } catch (error) {
+        console.error('DeleteTask Error:', error);
         const status = error.message.includes('not found') ? 404 : 400;
         return res.status(status).json({ message: error.message });
       }
@@ -65,13 +69,13 @@ module.exports = function taskControllerFactory(taskService) {
         const { id } = req.params;
 
         const updatedTask = await taskService.updateTask(id, {
-          isCompleted: true,
           status: 'done',
-          updatedAt: new Date(),
         });
 
         return res.status(200).json(updatedTask);
       } catch (error) {
+        console.error('CompleteTask Error:', error.message);
+
         const status = error.message.includes('not found') ? 404 : 400;
         return res.status(status).json({ message: error.message });
       }

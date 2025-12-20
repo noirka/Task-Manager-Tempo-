@@ -80,6 +80,7 @@ describe('TaskController Integration Tests', () => {
       title: 'Task to complete',
       description: 'Integration test task',
       userId: TEST_USER_ID,
+      status: 'todo',
     };
 
     const createdTask = await taskService.createTask(initialData);
@@ -90,12 +91,10 @@ describe('TaskController Integration Tests', () => {
       .set('X-User-Id', TEST_USER_ID)
       .expect(200);
 
-    if (putResponse.body.status) {
-      expect(putResponse.body.status).toBe('done');
-    }
-    if (putResponse.body.isCompleted !== undefined) {
-      expect(putResponse.body.isCompleted).toBe(true);
-    }
+    const isDone =
+      putResponse.body.status === 'done' ||
+      putResponse.body.isCompleted === true;
+    expect(isDone).toBe(true);
 
     expect(putResponse.body._id).toBe(taskId);
   });
