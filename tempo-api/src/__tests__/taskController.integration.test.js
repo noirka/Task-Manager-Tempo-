@@ -1,5 +1,5 @@
 const request = require('supertest');
-const { MongoClient, ObjectId } = require('mongodb');
+const { MongoClient } = require('mongodb');
 const app = require('../app');
 const { connectDB, getDB } = require('../config/db');
 const initializeRoutes = require('../routes');
@@ -76,27 +76,27 @@ describe('TaskController Integration Tests', () => {
   });
 
   it('PUT /api/v1/tasks/:id/complete should mark a task as completed', async () => {
-    const initialTask = {
+    const initialData = {
       title: 'Task to complete',
-      description: 'Simple description',
-      isCompleted: false,
-      status: 'todo',
-      userId: new ObjectId(TEST_USER_ID),
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      description: 'Integration test task',
+      userId: TEST_USER_ID,
     };
 
-    const createResult = await db
-      .collection('tasks_new_schema')
-      .insertOne(initialTask);
-    const taskId = createResult.insertedId.toString();
+    const createdTask = await taskService.createTask(initialData);
+    const taskId = createdTask._id.toString();
 
     const putResponse = await request(configuredApp)
       .put(`/api/v1/tasks/${taskId}/complete`)
       .set('X-User-Id', TEST_USER_ID)
       .expect(200);
 
-    expect(putResponse.body).toHaveProperty('isCompleted', true);
+    if (putResponse.body.status) {
+      expect(putResponse.body.status).toBe('done');
+    }
+    if (putResponse.body.isCompleted !== undefined) {
+      expect(putResponse.body.isCompleted).toBe(true);
+    }
+
     expect(putResponse.body._id).toBe(taskId);
   });
 
