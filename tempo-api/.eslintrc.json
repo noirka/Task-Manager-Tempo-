@@ -13,6 +13,7 @@
     },
     "rules": {
         "no-return-await": "off",
+        "import/no-relative-packages": "off",
         "consistent-return": "error",
         "no-console": [
             "error",
@@ -31,6 +32,22 @@
         ],
         "no-underscore-dangle": "off"
     },
+    "settings": {
+         "import/resolver": {
+            "alias": {
+            "map": [
+             [
+                 "@tempo-api/task-service", 
+                 "./packages/task-service"
+             ]
+         ],
+             "extensions": [
+                 ".js",
+                ".ts"
+            ]
+        }
+    }
+},
     "overrides": [
         {
             "files": [
