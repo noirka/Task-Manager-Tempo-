@@ -55,30 +55,27 @@ export class TaskService implements ITaskService {
     return this.repository.findAllByUserId(id);
   }
 
-  public async updateTask(
+ public async updateTask(
     taskId: string, 
     updateData: ITaskUpdateData,
-    userId: string // <<< ЗМІНА: Додано userId для авторизації
+    userId: string 
   ): Promise<ITask> {
     const id = this.toObjectId(taskId);
-    const userIdObj = this.toObjectId(userId); // <<< ЗМІНА: Конвертуємо ID користувача
+    const userIdObj = this.toObjectId(userId); 
     
-    // 1. ПЕРЕВІРКА АВТОРИЗАЦІЇ
     const currentTask = await this.getTaskById(taskId); 
-    if (!currentTask.userId.equals(userIdObj)) { // <<< ЗМІНА: ПОРІВНЯННЯ ID
+    
+    if (currentTask.userId.toString() !== userIdObj.toString()) { 
       throw new Error("Task not found or user not authorized."); 
     }
     
-    // 2. БІЗНЕС-ЛОГІКА
     if (currentTask.status === 'done' && updateData.title) {
       throw new Error("Cannot change title of a completed task.");
     }
 
-    // 3. ВИКЛИК РЕПОЗИТОРІЮ
-    // Передаємо ID користувача до репозиторію, щоб він використав його у фільтрі MongoDB
-    const updatedTask = await this.repository.update(id, updateData, userIdObj); // <<< ЗМІНА: Передаємо userIdObj
+    const updatedTask = await this.repository.update(id, updateData, userIdObj); 
     
-    if (!updatedTask) { 
+    if (!updatedTask) {
         throw new Error("Task not found or update failed unexpectedly.");
     }
     
