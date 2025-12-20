@@ -2,13 +2,23 @@ const request = require('supertest');
 const { MongoClient } = require('mongodb');
 const app = require('../app');
 const { connectDB, getDB } = require('../config/db');
+const initializeRoutes = require('../routes');
+const {
+  TaskService,
+  MongoTaskRepository,
+} = require('../../packages/task-service/dist/index');
 
 const uri = process.env.MONGO_URI || 'mongodb://localhost:27017';
 const client = new MongoClient(uri);
 
-describe('TaskController Integration Tests', () => {
-  let db;
+let configuredApp;
+let db;
+let tasksCollection;
+let taskRepository;
+let taskService;
+let services;
 
+describe('TaskController Integration Tests', () => {
   beforeAll(async () => {
     await connectDB();
     db = getDB();
@@ -16,6 +26,14 @@ describe('TaskController Integration Tests', () => {
     if (!db) {
       throw new Error('Failed to initialize database connection for tests.');
     }
+
+    tasksCollection = db.collection('tasks_new_schema');
+    taskRepository = new MongoTaskRepository(tasksCollection);
+    taskService = new TaskService(taskRepository);
+    services = { taskService };
+
+    app.use('/api/v1', initializeRoutes(services));
+    configuredApp = app;
   });
 
   beforeEach(async () => {
@@ -34,7 +52,7 @@ describe('TaskController Integration Tests', () => {
       description: 'Milk, bread, eggs',
     };
 
-    const postResponse = await request(app)
+    const postResponse = await request(configuredApp)
       .post('/api/v1/tasks')
       .send(taskData)
       .expect(201);
@@ -42,7 +60,7 @@ describe('TaskController Integration Tests', () => {
     expect(postResponse.body).toHaveProperty('_id');
     expect(postResponse.body.title).toBe(taskData.title);
 
-    await request(app)
+    await request(configuredApp)
       .get('/api/v1/tasks')
       .expect(200)
       .then((getResponse) => {
@@ -58,10 +76,12 @@ describe('TaskController Integration Tests', () => {
       createdAt: new Date(),
       updatedAt: new Date(),
     };
-    const createResult = await db.collection('tasks').insertOne(initialTask);
+    const createResult = await db
+      .collection('tasks_new_schema')
+      .insertOne(initialTask);
     const taskId = createResult.insertedId.toString();
 
-    const putResponse = await request(app)
+    const putResponse = await request(configuredApp)
       .put(`/api/v1/tasks/${taskId}/complete`)
       .expect(200);
 
@@ -69,7 +89,7 @@ describe('TaskController Integration Tests', () => {
   });
 
   it('PUT /api/v1/tasks/:id/complete should return 400 for invalid ObjectId format', async () => {
-    await request(app)
+    await request(configuredApp)
       .put('/api/v1/tasks/invalid-id-format/complete')
       .expect(400);
   });

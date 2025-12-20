@@ -1,4 +1,4 @@
-import { TaskService } from '@tempo-api/task-service/dist/index';
+const { TaskService } = require('@tempo-api/task-service/dist/index');
 
 const TaskRepository = require('../repositories/taskRepository');
 
