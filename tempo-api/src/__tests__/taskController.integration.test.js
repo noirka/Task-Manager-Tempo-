@@ -8,8 +8,10 @@ const {
   MongoTaskRepository,
 } = require('../../packages/task-service/dist/index');
 
-const uri = process.env.MONGO_URI || 'mongodb://localhost:27017';
+const uri = process.env.MONGO_URI || 'mongodb://localhost:27017/test_db_tasks';
 const client = new MongoClient(uri);
+
+const TEST_USER_ID = '654321098765432109876543';
 
 let configuredApp;
 let db;
@@ -17,8 +19,6 @@ let tasksCollection;
 let taskRepository;
 let taskService;
 let services;
-
-const TEST_USER_ID = '654321098765432109876543';
 
 describe('TaskController Integration Tests', () => {
   beforeAll(async () => {
@@ -67,6 +67,7 @@ describe('TaskController Integration Tests', () => {
       .get('/api/v1/tasks')
       .expect(200)
       .then((getResponse) => {
+        expect(getResponse.body).toBeInstanceOf(Array);
         expect(getResponse.body.length).toBe(1);
         expect(getResponse.body[0].title).toBe(taskData.title);
       });
@@ -76,9 +77,9 @@ describe('TaskController Integration Tests', () => {
     const initialTask = {
       title: 'Task to complete',
       isCompleted: false,
+      userId: TEST_USER_ID,
       createdAt: new Date(),
       updatedAt: new Date(),
-      userId: TEST_USER_ID,
     };
 
     const createResult = await db
@@ -90,12 +91,20 @@ describe('TaskController Integration Tests', () => {
       .put(`/api/v1/tasks/${taskId}/complete`)
       .expect(200);
 
-    expect(putResponse.body.isCompleted).toBe(true);
+    expect(putResponse.body).toHaveProperty('isCompleted', true);
+    expect(putResponse.body._id).toBe(taskId);
   });
 
   it('PUT /api/v1/tasks/:id/complete should return 400 for invalid ObjectId format', async () => {
     await request(configuredApp)
       .put('/api/v1/tasks/invalid-id-format/complete')
       .expect(400);
+  });
+
+  it('PUT /api/v1/tasks/:id/complete should return 404 if task not found', async () => {
+    const NON_EXISTENT_ID = '333333333333333333333333';
+    await request(configuredApp)
+      .put(`/api/v1/tasks/${NON_EXISTENT_ID}/complete`)
+      .expect(404);
   });
 });

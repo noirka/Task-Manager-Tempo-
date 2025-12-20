@@ -4,6 +4,8 @@ const TaskRepository = require('../repositories/taskRepository');
 
 jest.mock('../repositories/taskRepository');
 
+const VALID_MONGO_ID = '654321098765432109876543';
+
 let taskServiceInstance;
 
 describe('TaskService Unit Tests', () => {
@@ -17,8 +19,9 @@ describe('TaskService Unit Tests', () => {
 
   it('should successfully create a new task', async () => {
     const mockTask = {
-      _id: 'mockId123',
+      _id: VALID_MONGO_ID,
       title: 'New Test Task',
+      userId: VALID_MONGO_ID,
       isCompleted: false,
     };
     TaskRepository.create.mockResolvedValue(mockTask);
@@ -26,6 +29,7 @@ describe('TaskService Unit Tests', () => {
     const taskData = {
       title: 'New Test Task',
       description: 'Test description',
+      userId: VALID_MONGO_ID,
     };
 
     const result = await taskServiceInstance.createTask(taskData);
@@ -35,7 +39,7 @@ describe('TaskService Unit Tests', () => {
   });
 
   it('should throw an error if task title is missing', async () => {
-    const taskData = {};
+    const taskData = { userId: VALID_MONGO_ID };
 
     await expect(taskServiceInstance.createTask(taskData)).rejects.toThrow(
       'Task title is required',
@@ -45,20 +49,27 @@ describe('TaskService Unit Tests', () => {
   });
 
   it('should retrieve a task by id', async () => {
-    const mockTask = { _id: '123', title: 'Test Task' };
+    const mockTask = { _id: VALID_MONGO_ID, title: 'Test Task' };
     TaskRepository.findById.mockResolvedValue(mockTask);
 
-    const result = await taskServiceInstance.getTaskById('123');
+    const result = await taskServiceInstance.getTaskById(VALID_MONGO_ID);
 
-    expect(TaskRepository.findById).toHaveBeenCalledWith('123');
+    expect(TaskRepository.findById).toHaveBeenCalledWith(VALID_MONGO_ID);
     expect(result).toEqual(mockTask);
   });
 
   it('should throw an error if task not found by id', async () => {
     TaskRepository.findById.mockResolvedValue(null);
+    const NON_EXISTENT_ID = '333333333333333333333333';
 
-    await expect(taskServiceInstance.getTaskById('999')).rejects.toThrow(
-      'Task not found',
+    await expect(
+      taskServiceInstance.getTaskById(NON_EXISTENT_ID),
+    ).rejects.toThrow('Task not found');
+  });
+
+  it('should throw an error on invalid ID format', async () => {
+    await expect(taskServiceInstance.getTaskById('123')).rejects.toThrow(
+      'Invalid ID format: 123',
     );
   });
 });
