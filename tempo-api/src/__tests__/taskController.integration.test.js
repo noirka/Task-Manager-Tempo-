@@ -78,7 +78,7 @@ describe('TaskController Integration Tests', () => {
   it('PUT /api/v1/tasks/:id/complete should mark a task as completed', async () => {
     const initialTask = {
       title: 'Task to complete',
-      description: null,
+      description: '',
       status: 'todo',
       userId: new ObjectId(TEST_USER_ID),
       createdAt: new Date(),
