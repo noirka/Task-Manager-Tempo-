@@ -78,7 +78,7 @@ describe('TaskController Integration Tests', () => {
   it('PUT /api/v1/tasks/:id/complete should mark a task as completed', async () => {
     const initialTask = {
       title: 'Task to complete',
-      isCompleted: false,
+      description: null,
       status: 'todo',
       userId: new ObjectId(TEST_USER_ID),
       createdAt: new Date(),
@@ -101,16 +101,16 @@ describe('TaskController Integration Tests', () => {
 
   it('PUT /api/v1/tasks/:id/complete should return 400 for invalid ObjectId format', async () => {
     await request(configuredApp)
-      .set('X-User-Id', TEST_USER_ID)
       .put('/api/v1/tasks/invalid-id-format/complete')
+      .set('X-User-Id', TEST_USER_ID)
       .expect(400);
   });
 
   it('PUT /api/v1/tasks/:id/complete should return 404 if task not found', async () => {
     const NON_EXISTENT_ID = '333333333333333333333333';
     await request(configuredApp)
-      .set('X-User-Id', TEST_USER_ID)
       .put(`/api/v1/tasks/${NON_EXISTENT_ID}/complete`)
+      .set('X-User-Id', TEST_USER_ID)
       .expect(404);
   });
 });
