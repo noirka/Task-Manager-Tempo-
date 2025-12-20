@@ -65,6 +65,7 @@ module.exports = function taskControllerFactory(taskService) {
         const { id } = req.params;
 
         const updatedTask = await taskService.updateTask(id, {
+          isCompleted: true,
           status: 'done',
           updatedAt: new Date(),
         });

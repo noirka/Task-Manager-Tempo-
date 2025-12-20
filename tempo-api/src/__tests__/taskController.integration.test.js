@@ -78,7 +78,8 @@ describe('TaskController Integration Tests', () => {
   it('PUT /api/v1/tasks/:id/complete should mark a task as completed', async () => {
     const initialTask = {
       title: 'Task to complete',
-      description: '',
+      description: 'Simple description',
+      isCompleted: false,
       status: 'todo',
       userId: new ObjectId(TEST_USER_ID),
       createdAt: new Date(),
@@ -95,7 +96,7 @@ describe('TaskController Integration Tests', () => {
       .set('X-User-Id', TEST_USER_ID)
       .expect(200);
 
-    expect(putResponse.body).toHaveProperty('status', 'done');
+    expect(putResponse.body).toHaveProperty('isCompleted', true);
     expect(putResponse.body._id).toBe(taskId);
   });
 
