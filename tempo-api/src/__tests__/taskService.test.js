@@ -1,4 +1,5 @@
 const { TaskService } = require('@tempo-api/task-service/dist/index');
+const { ObjectId } = require('mongodb');
 
 const TaskRepository = require('../repositories/taskRepository');
 
@@ -19,9 +20,9 @@ describe('TaskService Unit Tests', () => {
 
   it('should successfully create a new task', async () => {
     const mockTask = {
-      _id: VALID_MONGO_ID,
+      _id: new ObjectId(VALID_MONGO_ID),
       title: 'New Test Task',
-      userId: VALID_MONGO_ID,
+      userId: new ObjectId(VALID_MONGO_ID),
       isCompleted: false,
     };
     TaskRepository.create.mockResolvedValue(mockTask);
@@ -35,6 +36,9 @@ describe('TaskService Unit Tests', () => {
     const result = await taskServiceInstance.createTask(taskData);
 
     expect(TaskRepository.create).toHaveBeenCalledTimes(1);
+    expect(TaskRepository.create.mock.calls[0][0].userId).toBeInstanceOf(
+      ObjectId,
+    );
     expect(result).toEqual(mockTask);
   });
 
@@ -49,12 +53,14 @@ describe('TaskService Unit Tests', () => {
   });
 
   it('should retrieve a task by id', async () => {
-    const mockTask = { _id: VALID_MONGO_ID, title: 'Test Task' };
+    const mockTask = { _id: new ObjectId(VALID_MONGO_ID), title: 'Test Task' };
     TaskRepository.findById.mockResolvedValue(mockTask);
 
     const result = await taskServiceInstance.getTaskById(VALID_MONGO_ID);
 
-    expect(TaskRepository.findById).toHaveBeenCalledWith(VALID_MONGO_ID);
+    expect(TaskRepository.findById).toHaveBeenCalledWith(
+      new ObjectId(VALID_MONGO_ID),
+    );
     expect(result).toEqual(mockTask);
   });
 
