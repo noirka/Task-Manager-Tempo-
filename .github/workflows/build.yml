@@ -44,6 +44,10 @@ jobs:
           echo "NODE_ENV=test" >> $GITHUB_ENV
           echo "MONGO_URI=mongodb://localhost:27017" >> $GITHUB_ENV
 
+      - name: Build internal packages (task-service)
+        run: npm run build
+        working-directory: ./tempo-api/packages/task-service
+
       - name: Run ESLint (Quality Check)
         run: npm run lint
         working-directory: ./tempo-api

@@ -11,6 +11,7 @@
     "lint:fix": "eslint index.js src/**/*.js --fix",
     "format": "prettier --write index.js src/**/*.js",
     "prepare": "husky",
+    "build:task-service": "npx tsc -p ../../packages/task-service/tsconfig.json",
     "fix": "npm run format && npm run lint:fix"
   },
   "keywords": [],
