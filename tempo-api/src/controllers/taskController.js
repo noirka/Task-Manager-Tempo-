@@ -75,10 +75,11 @@ module.exports = function taskControllerFactory(taskService) {
           );
         }
 
-        const updatedTask = await taskService.updateTask(id, {
-          status: 'done',
+        const updatedTask = await taskService.updateTask(
+          id,
+          { status: 'done' },
           userId,
-        });
+        );
 
         return res.status(200).json(updatedTask);
       } catch (error) {
