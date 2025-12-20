@@ -1,5 +1,5 @@
 import { ObjectId } from 'mongodb';
-import { ITask, ITaskRepository, ITaskService, ITaskCreateData } from './interfaces'; 
+import { ITask, ITaskRepository, ITaskService, ITaskCreateData, ITaskUpdateData } from './interfaces'; 
 
 export class TaskService implements ITaskService {
   private repository: ITaskRepository;
@@ -39,9 +39,15 @@ export class TaskService implements ITaskService {
     return newTask;
   }
 
-  public async getTaskById(taskId: string): Promise<ITask | null> {
+  public async getTaskById(taskId: string): Promise<ITask> {
     const id = this.toObjectId(taskId);
-    return this.repository.findById(id);
+    const task = await this.repository.findById(id);
+
+    if (!task) {
+        throw new Error("Task not found"); 
+    }
+    
+    return task;
   }
 
   public async getAllTasksByUserId(userId: string): Promise<ITask[]> {
@@ -51,26 +57,40 @@ export class TaskService implements ITaskService {
 
   public async updateTask(
     taskId: string, 
-    updateData: Partial<Omit<ITask, '_id' | 'createdAt' | 'userId'>>
-  ): Promise<ITask | null> {
+    updateData: ITaskUpdateData
+  ): Promise<ITask> {
     const id = this.toObjectId(taskId);
     
-    const currentTask = await this.repository.findById(id);
-    if (currentTask && currentTask.status === 'done' && updateData.title) {
+    const currentTask = await this.getTaskById(taskId); 
+    
+    if (currentTask.status === 'done' && updateData.title) {
         throw new Error("Cannot change title of a completed task.");
     }
 
-    return this.repository.update(id, updateData);
+    const updatedTask = await this.repository.update(id, updateData);
+    
+    if (!updatedTask) { 
+        throw new Error("Task update failed unexpectedly.");
+    }
+    
+    return updatedTask;
   }
 
   public async deleteTask(taskId: string): Promise<boolean> {
     const id = this.toObjectId(taskId);
     
-    const currentTask = await this.repository.findById(id);
-    if (currentTask && currentTask.status === 'in-progress') {
+    const currentTask = await this.getTaskById(taskId); 
+    
+    if (currentTask.status === 'in-progress') {
         throw new Error("Cannot delete task while it is in progress.");
     }
     
-    return this.repository.delete(id);
+    const deleted = await this.repository.delete(id);
+    
+    if (!deleted) {
+        throw new Error("Task deletion failed unexpectedly.");
+    }
+    
+    return deleted;
   }
 }

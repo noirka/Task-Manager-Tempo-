@@ -1,53 +1,112 @@
+const request = require('supertest');
+const { MongoClient } = require('mongodb');
+const app = require('../app');
+const { connectDB, getDB } = require('../config/db');
+const initializeRoutes = require('../routes');
 const {
   TaskService,
   MongoTaskRepository,
-} = require('./packages/task-service/dist/index');
+} = require('../../packages/task-service/dist/index');
 
-const app = require('./src/app');
-const { connectDB, getDB } = require('./src/config/db');
-const initializeRoutes = require('./src/routes');
+const uri = process.env.MONGO_URI || 'mongodb://localhost:27017/test_db_tasks';
+const client = new MongoClient(uri);
 
-const PORT = process.env.PORT || 3000;
+const TEST_USER_ID = '654321098765432109876543';
 
-async function startServer() {
-  try {
+let configuredApp;
+let db;
+let tasksCollection;
+let taskRepository;
+let taskService;
+let services;
+
+describe('TaskController Integration Tests', () => {
+  beforeAll(async () => {
     await connectDB();
-    const db = getDB();
+    db = getDB();
 
-    const tasksCollection = db.collection('tasks_new_schema');
-    const taskRepository = new MongoTaskRepository(tasksCollection);
+    if (!db) {
+      throw new Error('Failed to initialize database connection for tests.');
+    }
 
-    const taskService = new TaskService(taskRepository);
-
-    const services = { taskService };
+    tasksCollection = db.collection('tasks_new_schema');
+    taskRepository = new MongoTaskRepository(tasksCollection);
+    taskService = new TaskService(taskRepository);
+    services = { taskService };
 
     app.use('/api/v1', initializeRoutes(services));
+    configuredApp = app;
+  });
 
-    app.use((req, res) => {
-      res.status(404).json({ message: 'Not Found' });
-    });
+  beforeEach(async () => {
+    await db.collection('tasks_new_schema').deleteMany({});
+  });
 
-    // eslint-disable-next-line no-unused-vars
-    app.use((err, req, res, _next) => {
-      // eslint-disable-next-line no-console
-      console.error(err.stack);
-      res.status(500).json({
-        message: 'Something went wrong!',
-        error: err.message,
+  afterAll(async () => {
+    if (client) {
+      await client.close();
+    }
+  });
+
+  it('POST /api/v1/tasks should create a new task and GET should retrieve it', async () => {
+    const taskData = {
+      title: 'Buy groceries for the week',
+      description: 'Milk, bread, eggs',
+      userId: TEST_USER_ID,
+    };
+
+    const postResponse = await request(configuredApp)
+      .post('/api/v1/tasks')
+      .set('X-User-Id', TEST_USER_ID)
+      .send(taskData)
+      .expect(201);
+
+    expect(postResponse.body).toHaveProperty('_id');
+    expect(postResponse.body.title).toBe(taskData.title);
+
+    await request(configuredApp)
+      .get('/api/v1/tasks')
+      .set('X-User-Id', TEST_USER_ID)
+      .expect(200)
+      .then((getResponse) => {
+        expect(getResponse.body).toBeInstanceOf(Array);
+        expect(getResponse.body.length).toBe(1);
+        expect(getResponse.body[0].title).toBe(taskData.title);
       });
-    });
+  });
 
-    app.listen(PORT, () => {
-      // eslint-disable-next-line no-console
-      console.log(`Server is running on http://localhost:${PORT}`);
-      // eslint-disable-next-line no-console
-      console.log('API is connected to MongoDB!');
-    });
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('Failed to start server:', error);
-    process.exit(1);
-  }
-}
+  it('PUT /api/v1/tasks/:id/complete should mark a task as completed', async () => {
+    const initialTask = {
+      title: 'Task to complete',
+      isCompleted: false,
+      userId: TEST_USER_ID,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
 
-startServer();
+    const createResult = await db
+      .collection('tasks_new_schema')
+      .insertOne(initialTask);
+    const taskId = createResult.insertedId.toString();
+
+    const putResponse = await request(configuredApp)
+      .put(`/api/v1/tasks/${taskId}/complete`)
+      .expect(200);
+
+    expect(putResponse.body).toHaveProperty('isCompleted', true);
+    expect(putResponse.body._id).toBe(taskId);
+  });
+
+  it('PUT /api/v1/tasks/:id/complete should return 400 for invalid ObjectId format', async () => {
+    await request(configuredApp)
+      .put('/api/v1/tasks/invalid-id-format/complete')
+      .expect(400);
+  });
+
+  it('PUT /api/v1/tasks/:id/complete should return 404 if task not found', async () => {
+    const NON_EXISTENT_ID = '333333333333333333333333';
+    await request(configuredApp)
+      .put(`/api/v1/tasks/${NON_EXISTENT_ID}/complete`)
+      .expect(404);
+  });
+});

@@ -60,7 +60,8 @@
         {
             "files": [
                 "src/__tests__/**/*.js",
-                "**/*.test.js"
+                "**/*.test.js",
+                "index.js"
             ],
             "rules": {
                 "import/no-extraneous-dependencies": [

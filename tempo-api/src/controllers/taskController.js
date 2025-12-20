@@ -6,13 +6,20 @@ module.exports = function taskControllerFactory(taskService) {
   const TaskController = {
     async getTasks(req, res) {
       try {
-        const DUMMY_USER_ID = '60c72b2f9c1e18c0f4f4f4f4';
+        const userId = req.headers['x-user-id'];
 
-        const tasks = await taskService.getAllTasksByUserId(DUMMY_USER_ID);
+        if (!userId) {
+          return res
+            .status(401)
+            .json({ message: 'Authorization header (X-User-Id) is missing.' });
+        }
+
+        const tasks = await taskService.getAllTasksByUserId(userId);
         return res.status(200).json(tasks);
       } catch (error) {
+        const status = error.message.includes('Invalid ID format') ? 400 : 500;
         return res
-          .status(500)
+          .status(status)
           .json({ message: 'Internal server error', error: error.message });
       }
     },
@@ -33,10 +40,6 @@ module.exports = function taskControllerFactory(taskService) {
 
         const updatedTask = await taskService.updateTask(id, updateData);
 
-        if (!updatedTask) {
-          return res.status(404).json({ message: 'Task not found' });
-        }
-
         return res.status(200).json(updatedTask);
       } catch (error) {
         const status = error.message.includes('not found') ? 404 : 400;
@@ -48,11 +51,7 @@ module.exports = function taskControllerFactory(taskService) {
       try {
         const { id } = req.params;
 
-        const deleted = await taskService.deleteTask(id);
-
-        if (!deleted) {
-          return res.status(404).json({ message: 'Task not found' });
-        }
+        await taskService.deleteTask(id);
 
         return res.status(204).send();
       } catch (error) {
@@ -68,10 +67,6 @@ module.exports = function taskControllerFactory(taskService) {
         const updatedTask = await taskService.updateTask(id, {
           status: 'done',
         });
-
-        if (!updatedTask) {
-          return res.status(404).json({ message: 'Task not found' });
-        }
 
         return res.status(200).json(updatedTask);
       } catch (error) {
