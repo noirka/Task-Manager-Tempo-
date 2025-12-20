@@ -23,7 +23,13 @@ export interface ITaskRepository {
   create(taskData: Omit<ITask, '_id' | 'createdAt' | 'updatedAt'>): Promise<ITask>;
   findById(taskId: ObjectId): Promise<ITask | null>;
   findAllByUserId(userId: ObjectId): Promise<ITask[]>; 
-  update(taskId: ObjectId, updateData: Partial<Omit<ITask, '_id' | 'createdAt'>>): Promise<ITask | null>; 
+  
+  update(
+    taskId: ObjectId, 
+    updateData: Partial<Omit<ITask, '_id' | 'createdAt'>>, 
+    userId: ObjectId
+  ): Promise<ITask | null>; 
+
   delete(taskId: ObjectId): Promise<boolean>;
 }
 
@@ -31,6 +37,12 @@ export interface ITaskService {
   createTask(taskData: ITaskCreateData): Promise<ITask>;
   getTaskById(taskId: string): Promise<ITask>;
   getAllTasksByUserId(userId: string): Promise<ITask[]>;
-  updateTask(taskId: string, updateData: ITaskUpdateData): Promise<ITask>;
+  
+  updateTask(
+    taskId: string, 
+    updateData: ITaskUpdateData, 
+    userId: string
+  ): Promise<ITask>;
+
   deleteTask(taskId: string): Promise<boolean>; 
 }
