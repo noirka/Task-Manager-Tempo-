@@ -67,9 +67,17 @@ module.exports = function taskControllerFactory(taskService) {
     async completeTask(req, res) {
       try {
         const { id } = req.params;
+        const userId = req.headers['x-user-id'];
+
+        if (!userId) {
+          throw new Error(
+            'User ID is missing from headers for update operation.',
+          );
+        }
 
         const updatedTask = await taskService.updateTask(id, {
           status: 'done',
+          userId,
         });
 
         return res.status(200).json(updatedTask);
