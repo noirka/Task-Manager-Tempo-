@@ -72,7 +72,7 @@ export class TaskService implements ITaskService {
     taskId: string, 
     updateData: ITaskUpdateData,
     userId: string 
-  ): Promise<ITask> {
+ ): Promise<ITask> {
     const id = this.toObjectId(taskId);
     const userIdObj = this.toObjectId(userId); 
     
@@ -82,6 +82,10 @@ export class TaskService implements ITaskService {
       throw new Error("Cannot change title of a completed task.");
     }
 
+    if (updateData.status && currentTask.status === updateData.status) {
+        return currentTask;
+    }
+
     const updatedTask = await this.repository.update(id, updateData, userIdObj); 
     
     if (!updatedTask) { 
@@ -89,7 +93,7 @@ export class TaskService implements ITaskService {
     }
     
     return updatedTask;
-  }
+ }
 
   public async deleteTask(taskId: string): Promise<boolean> {
     const id = this.toObjectId(taskId);
