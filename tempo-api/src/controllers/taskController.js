@@ -27,7 +27,17 @@ module.exports = function taskControllerFactory(taskService) {
 
     async createTask(req, res) {
       try {
-        const newTask = await taskService.createTask(req.body);
+        const userId = req.headers['x-user-id'];
+
+        if (!userId) {
+          return res
+            .status(401)
+            .json({ message: 'User ID is missing from headers.' });
+        }
+
+        const taskData = { ...req.body, userId };
+
+        const newTask = await taskService.createTask(taskData);
         return res.status(201).json(newTask);
       } catch (error) {
         console.error('CreateTask Error:', error);
@@ -53,6 +63,10 @@ module.exports = function taskControllerFactory(taskService) {
           userId,
         );
 
+        if (!updatedTask) {
+          throw new Error('Task not found or user not authorized.');
+        }
+
         return res.status(200).json(updatedTask);
       } catch (error) {
         console.error('UpdateTask Error:', error);
@@ -68,13 +82,24 @@ module.exports = function taskControllerFactory(taskService) {
     async deleteTask(req, res) {
       try {
         const { id } = req.params;
+        const userId = req.headers['x-user-id'];
 
-        await taskService.deleteTask(id);
+        if (!userId) {
+          return res
+            .status(401)
+            .json({ message: 'User ID is missing from headers.' });
+        }
+
+        await taskService.deleteTask(id, userId);
 
         return res.status(204).send();
       } catch (error) {
         console.error('DeleteTask Error:', error);
-        const status = error.message.includes('not found') ? 404 : 400;
+        const status =
+          error.message.includes('not found') ||
+          error.message.includes('not authorized')
+            ? 404
+            : 400;
         return res.status(status).json({ message: error.message });
       }
     },
@@ -85,9 +110,9 @@ module.exports = function taskControllerFactory(taskService) {
         const userId = req.headers['x-user-id'];
 
         if (!userId) {
-          throw new Error(
-            'User ID is missing from headers for update operation.',
-          );
+          return res.status(401).json({
+            message: 'User ID is missing from headers for complete operation.',
+          });
         }
 
         const updatedTask = await taskService.updateTask(
@@ -96,19 +121,30 @@ module.exports = function taskControllerFactory(taskService) {
           userId,
         );
 
+        if (!updatedTask) {
+          throw new Error('Task not found or user not authorized.');
+        }
+
         return res.status(200).json(updatedTask);
       } catch (error) {
         console.error('CompleteTask Error:', error.message);
 
-        const status =
+        let status;
+
+        if (
           error.message.includes('not found') ||
           error.message.includes('not authorized')
-            ? 404
-            : 400;
+        ) {
+          status = 404;
+        } else if (error.message.includes('Invalid ID format')) {
+          status = 400;
+        } else {
+          status = 400;
+        }
+
         return res.status(status).json({ message: error.message });
       }
     },
   };
-
   return TaskController;
 };
