@@ -49,13 +49,26 @@ export class TaskService implements ITaskService {
     
     return task;
   }
+  
+  public async getTaskByIdAndUser(taskId: string, userId: string): Promise<ITask> {
+    const id = this.toObjectId(taskId);
+    const userIdObj = this.toObjectId(userId);
+    
+    const task = await this.repository.findByIdAndUserId(id, userIdObj);
+
+    if (!task) {
+        throw new Error("Task not found or user not authorized."); 
+    }
+    
+    return task;
+  }
 
   public async getAllTasksByUserId(userId: string): Promise<ITask[]> {
     const id = this.toObjectId(userId);
     return this.repository.findAllByUserId(id);
   }
 
- public async updateTask(
+  public async updateTask(
     taskId: string, 
     updateData: ITaskUpdateData,
     userId: string 
@@ -63,11 +76,7 @@ export class TaskService implements ITaskService {
     const id = this.toObjectId(taskId);
     const userIdObj = this.toObjectId(userId); 
     
-    const currentTask = await this.getTaskById(taskId); 
-    
-    if (currentTask.userId.toString() !== userIdObj.toString()) { 
-      throw new Error("Task not found or user not authorized."); 
-    }
+    const currentTask = await this.getTaskByIdAndUser(taskId, userId); 
     
     if (currentTask.status === 'done' && updateData.title) {
       throw new Error("Cannot change title of a completed task.");
@@ -75,8 +84,8 @@ export class TaskService implements ITaskService {
 
     const updatedTask = await this.repository.update(id, updateData, userIdObj); 
     
-    if (!updatedTask) {
-        throw new Error("Task not found or update failed unexpectedly.");
+    if (!updatedTask) { 
+        throw new Error("Task update failed unexpectedly.");
     }
     
     return updatedTask;

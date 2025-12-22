@@ -27,6 +27,11 @@ export class MongoTaskRepository implements ITaskRepository {
     return task;
   }
 
+  async findByIdAndUserId(taskId: ObjectId, userId: ObjectId): Promise<ITask | null> {
+    const task = await this.tasks.findOne({ _id: taskId, userId: userId });
+    return task;
+  }
+
   async findAllByUserId(userId: ObjectId): Promise<ITask[]> { 
     const tasks = await this.tasks.find({ userId: userId }).toArray();
     return tasks;
@@ -35,7 +40,7 @@ export class MongoTaskRepository implements ITaskRepository {
   async update(
     taskId: ObjectId, 
     updateData: Partial<Omit<ITask, '_id' | 'createdAt'>>,
-    userId: ObjectId
+    userId: ObjectId 
   ): Promise<ITask | null> {
     
     const updatePayload = { 

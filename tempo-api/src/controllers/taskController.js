@@ -56,7 +56,11 @@ module.exports = function taskControllerFactory(taskService) {
         return res.status(200).json(updatedTask);
       } catch (error) {
         console.error('UpdateTask Error:', error);
-        const status = error.message.includes('not found') ? 404 : 400;
+        const status =
+          error.message.includes('not found') ||
+          error.message.includes('not authorized')
+            ? 404
+            : 400;
         return res.status(status).json({ message: error.message });
       }
     },
@@ -96,7 +100,11 @@ module.exports = function taskControllerFactory(taskService) {
       } catch (error) {
         console.error('CompleteTask Error:', error.message);
 
-        const status = error.message.includes('not found') ? 404 : 400;
+        const status =
+          error.message.includes('not found') ||
+          error.message.includes('not authorized')
+            ? 404
+            : 400;
         return res.status(status).json({ message: error.message });
       }
     },
